@@ -6,6 +6,8 @@
 #include <time.h>
 #include "stdlib.h"
 
+static uint64_t gCounter;
+
 static uint64_t rand64() {
     uint64_t result = 0;
     for (int i = 0; i < 8; i++) {
@@ -23,12 +25,25 @@ static void rand192(uint64_t out[3]) {
 
 static void clock128(uint64_t out[2])
 {
+    time_t t = time(nullptr);
+    out[1] = t;
+    t = (t << 8) | (rand() & 0xFF);
+    out[0] = t;
+}
 
+static uint64_t randGenerator(int min, int max)
+{
+    return rand() % (max - min + 1)
+                    + min;
 }
 
 static void counter128(uint64_t out[2])
 {
-
+    uint64_t t = gCounter;
+    out[1] = t;
+    t = (t << 8) | (rand() & 0xFF);
+    out[0] = t;
+    gCounter += randGenerator(1,5);
 }
 
 ZUID_API struct scalarZUID makeNewZUID()
@@ -39,6 +54,11 @@ ZUID_API struct scalarZUID makeNewZUID()
     counter128(counter);
     uint64_t random[3];
     rand192(random);
+    return (struct scalarZUID){.name="ZUID",.version=1,.time=*clock,.counter=*counter,.random=*random};
+}
 
-    return {.name="ZUID",.version=1,.clock=clock,.counter=counter,.random=random};
+ZUID_API void initZUIDCounters()
+{
+    srand(time(nullptr));
+    gCounter = rand();
 }

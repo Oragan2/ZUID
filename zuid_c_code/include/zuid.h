@@ -18,5 +18,6 @@ struct scalarZUID
 };
 
 ZUID_API struct scalarZUID makeNewZUID();
+ZUID_API void initZUIDCounters();
 
 #endif //ZUID_ZUID_H
